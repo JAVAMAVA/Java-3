@@ -13,6 +13,6 @@ public interface Model {
 	void getSolutionInModel(String arg);
 	public void saveToFile();
 	public void readFromFile();
-	void generateMaze(String name, int rows, int cols, MazeGenerator mg);
+	void generateMaze(String name, int rows, int cols );
 
 }

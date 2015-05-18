@@ -11,21 +11,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.omg.CORBA.CustomMarshal;
-
-import algorithms.demo.MazeDomain;
 import algorithms.mazeGenerators.DFSMazeGenerator;
 import algorithms.mazeGenerators.Maze;
-import algorithms.mazeGenerators.MazeGenerator;
+import algorithms.mazeGenerators.RandomMazeGenerator;
 import algorithms.search.AStar;
-import algorithms.search.Searcher;
+import algorithms.search.BFS;
 import algorithms.search.Solution;
 import algorithms.search.TestSearcher;
 
@@ -46,6 +42,10 @@ public class MyModel extends java.util.Observable implements Model {
 	HashMap<String,Maze> mazeNames;
 	Maze currMaze;
 	Solution currSol;
+	String mazeAlg;
+	String solveAlg;
+	
+	
 	public MyModel(int SizeOfThreadPool) {
 		pool = new ThreadPoolExecutor(0, SizeOfThreadPool, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(4));
 		ConcurrentHashMap<Maze,Solution> mazeSolutions = new ConcurrentHashMap<Maze,Solution>();
@@ -59,32 +59,61 @@ public class MyModel extends java.util.Observable implements Model {
 	 */
 
 	@Override
-	public void generateMaze(String name,int rows, int cols,MazeGenerator mg ) { 
+	public void generateMaze(String name,int rows, int cols ) { 
 		System.out.println("Generating Maze");
 		Maze maze = null;
 		checkMaze(name);
-		Future<Maze> m = pool.submit(new Callable<Maze>(){
-			@Override
-			public Maze call() throws Exception {
-				MazeGenerator dm = mg;
-				return (dm.generateMaze(rows, cols));
-			}
-		}
-		);
-		try {
-			maze  = m.get();
-			mazeNames.put(name, maze);
-			currMaze = maze;
-			setChanged();
-			notifyObservers("Maze generated");
-		} catch (InterruptedException e) {
-			
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			
-			e.printStackTrace();
-		}
 		
+		switch(mazeAlg){
+		case "DFS":
+			Future<Maze> m = pool.submit(new Callable<Maze>(){
+				@Override
+				public Maze call() throws Exception {
+					DFSMazeGenerator dm = new DFSMazeGenerator();
+					return (dm.generateMaze(rows, cols));
+				}
+			}
+			);
+			try {
+				maze  = m.get();
+				mazeNames.put(name, maze);
+				currMaze = maze;
+				mazeNames.put(name, currMaze);
+				setChanged();
+				notifyObservers("Maze generated");
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				
+				e.printStackTrace();
+			}
+			break;
+		case "Random":
+			Future<Maze> mr = pool.submit(new Callable<Maze>(){
+				@Override
+				public Maze call() throws Exception {
+					RandomMazeGenerator dm = new RandomMazeGenerator();
+					return (dm.generateMaze(rows, cols));
+				}
+			}
+			);
+			try {
+				maze  = mr.get();
+				mazeNames.put(name, maze);
+				currMaze = maze;
+				mazeNames.put(name, currMaze);
+				setChanged();
+				notifyObservers("Maze generated");
+			} catch (InterruptedException e) {
+				
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				
+				e.printStackTrace();
+			}
+			break;
+		}	
 	}
 	/**
 	 * getMaze sends the maze that was generated last
@@ -103,29 +132,59 @@ public class MyModel extends java.util.Observable implements Model {
 		System.out.println("Solving Maze");
 		Solution solution;
 		
-		Future<Solution> sm = pool.submit(new Callable<Solution>(){
-
-			@Override
-			public Solution call() throws Exception {
-				NewMazeDomain m = new NewMazeDomain(mazeNames.get(name));
-				m.setMatrix(mazeNames.get(name));
-				Solution s = new Solution();
-				TestSearcher ts = new TestSearcher();
-				ts.Test(new AStar(),m );
+		switch(solveAlg){
+		case "Bfs":
+			Future<Solution> sm = pool.submit(new Callable<Solution>(){
+				@Override
+				public Solution call() throws Exception {
+					NewMazeDomain m = new NewMazeDomain(mazeNames.get(name));
+					m.setMatrix(mazeNames.get(name));
+					TestSearcher ts = new TestSearcher();
+					ts.Test(new BFS(),m );
 				
-				return ts.getSolutionSearcher();
-			}	
-		});
-		try {
-			solution = sm.get();
-			currSol = solution;
-			setChanged();
-			notifyObservers("maze solved");
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
+					return ts.getSolutionSearcher();
+				}	
+			});
+			try {
+				solution = sm.get();
+				currSol = solution;
+				mazeSolutions.put(mazeNames.get(name), currSol);
+				setChanged();
+				notifyObservers("maze solved");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			break;
+		case "Astar":
+			Future<Solution> am = pool.submit(new Callable<Solution>(){
+				@Override
+				public Solution call() throws Exception {
+					NewMazeDomain m = new NewMazeDomain(mazeNames.get(name));
+					m.setMatrix(mazeNames.get(name));
+					TestSearcher ts = new TestSearcher();
+					ts.Test(new AStar(),m );
+				
+					return ts.getSolutionSearcher();
+				}	
+			});
+			try {
+				solution = am.get();
+				currSol = solution;
+				mazeSolutions.put(mazeNames.get(name), currSol);
+				setChanged();
+				notifyObservers("maze solved");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+			break;
+		
 		}
+		
+		
 		
 		
 	}
@@ -155,7 +214,6 @@ public class MyModel extends java.util.Observable implements Model {
 	 */
 	
 	public void checkSolution(String name){
-		Maze m;
 		if(mazeNames.get(name) != null){
 			currMaze = mazeNames.get(name);
 			if(mazeSolutions.get(currMaze) != null){
@@ -177,7 +235,6 @@ public class MyModel extends java.util.Observable implements Model {
 	 * @param name the maze name we got
 	 */
 	public void checkMaze(String name){
-		Maze m;
 		if(mazeNames.get(name) != null){
 			currMaze = mazeNames.get(name);
 			setChanged();

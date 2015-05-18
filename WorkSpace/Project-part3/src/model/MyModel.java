@@ -1,6 +1,8 @@
 package model;
 
-import observer.Observable;
+import java.util.Observable;
+import java.util.Observer;
+
 import algorithms.mazeGenerators.Maze;
 import algorithms.search.Solution;
 
@@ -9,8 +11,12 @@ public class MyModel extends Observable implements Model {
 	@Override
 	public void generateMaze(int rows, int cols) {
 		System.out.println("Generating Maze");
-		notifyObserver(this, "");
+		notifyObservers();
 		
+	}@Override
+	public void addobserver(Observer observer)
+	{
+		this.addObserver(observer);
 	}
 
 	@Override

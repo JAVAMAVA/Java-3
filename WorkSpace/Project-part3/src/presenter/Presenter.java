@@ -1,39 +1,64 @@
 package presenter;
 
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
 import algorithms.mazeGenerators.Maze;
-import observer.Observable;
-import observer.Observer;
+import algorithms.search.Solution;
 import model.Model;
 import view.View;
-
+/**
+ * Presenter is the the class that runs every command and control the actions. It has a {@link View} and a {@link Model} that i controls on.
+ * The class implements {@link Observer} and that means it gets notifications from the {@link View} and the {@link Model}
+ * @author עמית
+ *
+ */
 public class Presenter implements Observer {
 	View v;
 	Model m;
-	public Presenter(TestMVPCommand tmc,View v,Model m) {
+	HashMap<String,Command> comm=new HashMap<String, Command>();
+	public Presenter(View v,Model m) {
 		this.v=v;
 		this.m=m;
-		HashMap<String,Command> comm=new HashMap<String, Command>();
-		comm.put("Testmvp", tmc);
+		
+	}
+	public void setCommands()
+	{
+		comm.put("generate maze",new GenerateMazeCommand());
+		comm.put("display maze", new DisplayMazeCommand());
+		comm.put("solve maze", new SolveMazeCommand());
+		comm.put("display solution", new DisplayMazeCommand());
+		comm.put("exit", new ExitCommand());
 		v.setCommands(comm);
 	}
-	public Presenter() {
-		// TODO Auto-generated constructor stub
-	}
 	@Override
-	public void update(Observable o,Object args){
+	public void update(Observable o, Object args) {
 			//if the view notified the presenter
 		   if(o == v) {
+			   if((String)args=="start")
+				   v.setCommands(comm);
+			   else
+			   {
 					Command newComm=v.getUserCommand();
-					newComm.doCommand("");
+					newComm.doCommand((String)args);
+			   }
 		   }
 		   
 		   //if the model notified the presenter
 		   if(o == m) {
-			   m.getMaze();
-			   v.displayMaze(new Maze(10,10));
-		         
+			   if((String)args=="maze")
+			   	{
+				 Maze matrix=m.getMaze();
+				 v.displayMaze(matrix);
+				 
+			   	}
+			   if((String)args=="solution")
+			   	{
+				   Solution sol=m.getSolution();
+				   v.displaySolution(sol);
+			   	}
+			   else v.displaySuccess((String)args);     
 		   }
 
 		   
@@ -43,15 +68,58 @@ public class Presenter implements Observer {
 	public interface Command {
 		void doCommand(String arg);
 	}
-	public class TestMVPCommand implements Command {
+	public class GenerateMazeCommand implements Command {
 
 		@Override
 		public void doCommand(String arg) {
-			m.generateMaze(10, 10);
-			
+			String[] commands=arg.split(" ");
+			m.generateMaze(commands[0],Integer.parseInt(commands[1]),Integer.parseInt(commands[2]));
+			v.displaySuccess("maze"+commands[0]+" is ready");
 		}
 
 	}
+	public class DisplayMazeCommand implements Command
+	{
+
+		@Override
+		public void doCommand(String arg) {
+			m.getMazeInModel(arg);
+			
+		}
+		
+	}
+	public class SolveMazeCommand implements Command
+	{
+
+		@Override
+		public void doCommand(String arg) {
+			m.solveMaze(arg);
+			v.displaySuccess("solution for "+arg+" is ready");
+			
+		}
+	}
+	public class DisplaySolutionCommand implements Command
+	{
+
+		@Override
+		public void doCommand(String arg) {
+			m.getSolutionInModel(arg);
+			
+		}
+		
+	}
+	public class ExitCommand implements Command
+	{
+
+		@Override
+		public void doCommand(String arg) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
+	
 }
+
 
 

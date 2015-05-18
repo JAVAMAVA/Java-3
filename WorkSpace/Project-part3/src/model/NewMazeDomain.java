@@ -14,10 +14,10 @@ public class NewMazeDomain implements Searchable{
 	State goalState;
 	private boolean diagonalRunning=false;
 	
-	public NewMazeDomain(Maze matrix,int xstart,int ystart,) {
+	public NewMazeDomain(Maze matrix) {
 		this.matrix = matrix;
-		this.startState = start;
-		this.goalState = goal;
+		this.startState = new State("(0,0");
+		this.goalState = new State("("+(matrix.getRows()-1)+","+(matrix.getCols()-1)+")");
 		
 		
 	}

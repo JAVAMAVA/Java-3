@@ -18,9 +18,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import org.omg.CORBA.CustomMarshal;
+
 import algorithms.demo.MazeDomain;
 import algorithms.mazeGenerators.DFSMazeGenerator;
 import algorithms.mazeGenerators.Maze;
+import algorithms.mazeGenerators.MazeGenerator;
 import algorithms.search.AStar;
 import algorithms.search.Searcher;
 import algorithms.search.Solution;
@@ -43,8 +46,8 @@ public class MyModel extends java.util.Observable implements Model {
 	HashMap<String,Maze> mazeNames;
 	Maze currMaze;
 	Solution currSol;
-	public MyModel() {
-		pool = new ThreadPoolExecutor(0, 0, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(4));
+	public MyModel(int SizeOfThreadPool) {
+		pool = new ThreadPoolExecutor(0, SizeOfThreadPool, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(4));
 		ConcurrentHashMap<Maze,Solution> mazeSolutions = new ConcurrentHashMap<Maze,Solution>();
 		ConcurrentHashMap<String,Maze> mazeNames = new ConcurrentHashMap<String, Maze>();
 	}
@@ -56,14 +59,14 @@ public class MyModel extends java.util.Observable implements Model {
 	 */
 
 	@Override
-	public void generateMaze(String name,int rows, int cols ) { 
+	public void generateMaze(String name,int rows, int cols,MazeGenerator mg ) { 
 		System.out.println("Generating Maze");
 		Maze maze = null;
 		checkMaze(name);
 		Future<Maze> m = pool.submit(new Callable<Maze>(){
 			@Override
 			public Maze call() throws Exception {
-				DFSMazeGenerator dm = new DFSMazeGenerator();
+				MazeGenerator dm = mg;
 				return (dm.generateMaze(rows, cols));
 			}
 		}
@@ -104,7 +107,7 @@ public class MyModel extends java.util.Observable implements Model {
 
 			@Override
 			public Solution call() throws Exception {
-				NewMazeDomain m = new NewMazeDomain(matrix, start, goal);
+				NewMazeDomain m = new NewMazeDomain(mazeNames.get(name));
 				m.setMatrix(mazeNames.get(name));
 				Solution s = new Solution();
 				TestSearcher ts = new TestSearcher();

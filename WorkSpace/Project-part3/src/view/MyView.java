@@ -1,5 +1,11 @@
 package view;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
@@ -21,7 +27,9 @@ public class MyView extends Observable implements View {
 	public Command lastcommand;
 	MyCLI c;
 	public MyView() {
-		c=new MyCLI();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter writer = new PrintWriter(System.out);
+		c=new MyCLI(reader,writer,this);
 	}
 	@Override
 	public void addobserver(Observer observer)
@@ -37,10 +45,10 @@ public class MyView extends Observable implements View {
 	{
 		setChanged();
 		notifyObservers("start");
-		String str=c.start();
-		if(comm.get(str)!=null)
-			lastcommand=comm.get(str);
-		else this.notifyArg(str);
+		c.start();
+		//if(comm.get(str)!=null)
+			//lastcommand=comm.get(str);
+		//else this.notifyArg(str);
 		
 	}
 	@Override

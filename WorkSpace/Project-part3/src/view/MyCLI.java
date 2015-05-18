@@ -17,16 +17,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MyCLI extends CLI implements Runnable  {
 	
-	ConcurrentHashMap<String, presenter.Presenter.Command> hm;
+	HashMap<String, presenter.Presenter.Command> hm;
+	View v;
 	public MyCLI(BufferedReader in, PrintWriter out,View v) {
 		super(in, out);
-		hm=new ConcurrentHashMap<>();
+		hm=new HashMap<>();
 		this.v=v;
 
 	}
 	
 	@Override 
-	public String start()
+	public void start()
 	{
 		try {
 		System.out.println("Enter a command");
@@ -38,17 +39,18 @@ public class MyCLI extends CLI implements Runnable  {
 								
 				String commandName = sp[0]+" "+sp[1];
 				String arg1 = null;
-				if (sp.length > 2)
-				{
-					if(sp.length>3)
+					if(sp.length>4)
 					{
-						arg1 = sp[2]+" "+sp[3];
-						
+					arg1 = sp[2]+" "+sp[3]+" "+sp[4];
+					v.setLastCommand(hm.get(commandName));
+					v.notifyArg(arg1);
 					}
-					arg1=sp[2];
-					return arg1;
-				}
-				return commandName;
+					else 
+					{
+						v.setLastCommand(hm.get(commandName));
+						v.notifyArg(sp[2]);
+					}
+						
 			}
 					
 		} catch (IOException e) {

@@ -44,10 +44,15 @@ public class Presenter implements Observer {
 		   if(o == v) {
 			   if((String)args=="start")
 				   v.setCommands(comm);
-			   else
+			   if((String)args=="exit")
 			   {
-					Command newComm=v.getUserCommand();
+					Command newComm=new ExitCommand();
 					newComm.doCommand((String)args);
+			   }
+			   else 
+			   {
+				   Command newComm=v.getUserCommand();
+				   newComm.doCommand((String)args);
 			   }
 		   }
 		   
@@ -90,7 +95,7 @@ public class Presenter implements Observer {
 		public void doCommand(String arg) {
 			String[] commands=arg.split(" ");
 			//check input
-			m.generateMaze(commands[0],Integer.parseInt(commands[1]),Integer.parseInt(commands[2]));
+			m.generateMaze(commands[0],Integer.parseInt(commands[1]),Integer.parseInt(commands[2]),);
 			v.displaySuccess("maze"+commands[0]+" is ready");
 		}
 

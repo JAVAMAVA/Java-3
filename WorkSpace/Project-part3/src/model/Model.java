@@ -1,10 +1,10 @@
 package model;
 
 import algorithms.mazeGenerators.Maze;
+import algorithms.mazeGenerators.MazeGenerator;
 import algorithms.search.Solution;
 
 public interface Model {
-	void generateMaze(String name,int rows,int cols); 
 	void solveMaze(String name); 
 	Solution getSolution(String name); 
 	void stop();
@@ -13,5 +13,6 @@ public interface Model {
 	void getSolutionInModel(String arg);
 	public void saveToFile();
 	public void readFromFile();
+	void generateMaze(String name, int rows, int cols, MazeGenerator mg);
 
 }

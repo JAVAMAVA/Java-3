@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link MyCLI} extends {@link CLI} and implements {@link Runnable} 
@@ -16,10 +17,10 @@ import java.util.HashMap;
 
 public class MyCLI extends CLI implements Runnable  {
 	
-	HashMap<String, presenter.Presenter.Command> hm;
+	ConcurrentHashMap<String, presenter.Presenter.Command> hm;
 	public MyCLI(BufferedReader in, PrintWriter out,View v) {
 		super(in, out);
-		hm=new HashMap<>();
+		hm=new ConcurrentHashMap<>();
 		this.v=v;
 
 	}

@@ -11,5 +11,7 @@ public interface Model {
 	Maze getMaze();
 	void getMazeInModel(String arg);
 	void getSolutionInModel(String arg);
+	public void saveToFile();
+	public void readFromFile();
 
 }

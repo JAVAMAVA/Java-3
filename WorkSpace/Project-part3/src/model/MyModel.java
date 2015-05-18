@@ -1,13 +1,22 @@
 package model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import algorithms.demo.MazeDomain;
 import algorithms.mazeGenerators.DFSMazeGenerator;
@@ -36,8 +45,8 @@ public class MyModel extends java.util.Observable implements Model {
 	Solution currSol;
 	public MyModel() {
 		pool = new ThreadPoolExecutor(0, 0, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(4));
-		HashMap<Maze,Solution> mazeSolutions = new HashMap<Maze,Solution>();
-		HashMap<String,Maze> mazeNames = new HashMap<String, Maze>();
+		ConcurrentHashMap<Maze,Solution> mazeSolutions = new ConcurrentHashMap<Maze,Solution>();
+		ConcurrentHashMap<String,Maze> mazeNames = new ConcurrentHashMap<String, Maze>();
 	}
 	/**
 	 * generateMaze is a public method for generating a maze
@@ -127,6 +136,12 @@ public class MyModel extends java.util.Observable implements Model {
 
 	@Override
 	public void stop() {
+		try {
+			pool.awaitTermination(60, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		pool.shutdown();
 		
 		
 		
@@ -166,9 +181,104 @@ public class MyModel extends java.util.Observable implements Model {
 			notifyObservers("Maze already exists");
 		}
 	}
+	/**
+	 * saveToFile takes the mazeSolution map and compresses it using zip format
+	 * @param arg saves the hashmap as a string
+	 * @param zos the zip outputstream 
+	 */
 	
 	public void saveToFile(){
 		
+		String arg = mazeSolutions.toString();
+		ZipOutputStream zos = null;
+	    try {
+	    	File file= new File(arg);
+	      String name = file.getName();
+	      zos = new ZipOutputStream(new FileOutputStream("myHashZip.zip"));
+
+	      ZipEntry entry = new ZipEntry(name);
+	      zos.putNextEntry(entry);
+
+	      FileInputStream fis = null;
+	      try {
+	        fis = new FileInputStream(file);
+	        byte[] byteBuffer = new byte[1024];
+	        int bytesRead = -1;
+	        while ((bytesRead = fis.read(byteBuffer)) != -1) {
+	          zos.write(byteBuffer, 0, bytesRead);
+	        }
+	        zos.flush();
+	      } finally {
+	        try {
+	          fis.close();
+	        } catch (Exception e) {
+	        }
+	      }
+	      zos.closeEntry();
+
+	      zos.flush();
+	    } catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		} finally {
+	      try {
+	        zos.close();
+	      } catch (Exception e) {
+	      }
+	    }
+	}
+	/**
+	 * readFromFile is a method that takes a compressed zip file with an hashmap<maze,solution> and decompresses it
+	 */
+	public void readFromFile(){
+		 byte[] buffer = new byte[1024];
+	     File file= new File("myHashZip.zip");
+	     
+	     try{
+	 
+	    	//create output directory is not exists
+	    	File folder = new File(file.getParent());
+	    	if(!folder.exists()){
+	    		folder.mkdir();
+	    	}
+	 
+	    	//get the zip file content
+	    	ZipInputStream zis = 
+	    		new ZipInputStream(new FileInputStream("myHashZip.zip"));
+	    	//get the zipped file list entry
+	    	ZipEntry ze = zis.getNextEntry();
+	 
+	    	while(ze!=null){
+	 
+	    	   String fileName = ze.getName();
+	           File newFile = new File(file.getParent() + File.separator + fileName);
+	 
+	           System.out.println("file unzip : "+ newFile.getAbsoluteFile());
+	 
+	            //create all non exists folders
+	            //else you will hit FileNotFoundException for compressed folder
+	            new File(newFile.getParent()).mkdirs();
+	 
+	            FileOutputStream fos = new FileOutputStream(newFile);             
+	 
+	            int len;
+	            while ((len = zis.read(buffer)) > 0) {
+	       		fos.write(buffer, 0, len);
+	            }
+	 
+	            fos.close();   
+	            ze = zis.getNextEntry();
+	    	}
+	 
+	        zis.closeEntry();
+	    	zis.close();
+	 
+	    	System.out.println("Done");
+	 
+	    }catch(IOException ex){
+	       ex.printStackTrace(); 
+	    }
 		
 	}
 	/**

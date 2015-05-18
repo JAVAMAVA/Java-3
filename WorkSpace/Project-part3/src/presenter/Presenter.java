@@ -12,8 +12,9 @@ import view.View;
  * Presenter is the the class that runs every command and control the actions. It has a {@link View} and a {@link Model} that i controls on.
  * The class implements {@link Observer} and that means it gets notifications from the {@link View} and the {@link Model}
  * @author Michael & Amit
- *
- *
+ * @param v the view 
+ * @param m the model
+ * @param comm the commands hashmap
  */
 public class Presenter implements Observer {
 	View v;
@@ -33,6 +34,10 @@ public class Presenter implements Observer {
 		comm.put("exit", new ExitCommand());
 		v.setCommands(comm);
 	}
+	/**
+	 * this method overrides the update method from <<Observer>>
+	 * this method is the main method that controlls the traffic between the model and the view
+	 */
 	@Override
 	public void update(Observable o, Object args) {
 			//if the view notified the presenter
@@ -75,6 +80,10 @@ public class Presenter implements Observer {
 	public interface Command {
 		void doCommand(String arg);
 	}
+	/**
+	 * {@link GenerateMazeCommand} is called when the view sends a generate maze command
+	 *
+	 */
 	public class GenerateMazeCommand implements Command {
 
 		@Override
@@ -86,6 +95,10 @@ public class Presenter implements Observer {
 		}
 
 	}
+	/**
+	 *{@link DisplayMazeCommand} is called when the display maze command is triggered 
+	 *
+	 */
 	public class DisplayMazeCommand implements Command
 	{
 
@@ -96,6 +109,10 @@ public class Presenter implements Observer {
 		}
 		
 	}
+	/**
+	 * {@link SolveMazeCommand} gets a solution from the model to the view when the solve maze command is triggered
+	 *
+	 */
 	public class SolveMazeCommand implements Command
 	{
 
@@ -106,6 +123,9 @@ public class Presenter implements Observer {
 			
 		}
 	}
+	/**
+	 * {@link DisplaySolutionCommand} asks for a maze solution when the get solution command is triggered 
+	 */
 	public class DisplaySolutionCommand implements Command
 	{
 
@@ -116,6 +136,9 @@ public class Presenter implements Observer {
 		}
 		
 	}
+	/**
+	 * {@link ExitCommand} is called when the user wants to terminate the program
+	 */
 	public class ExitCommand implements Command
 	{
 

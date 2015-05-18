@@ -5,6 +5,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+/**
+ * {@link MyCLI} extends {@link CLI} and implements {@link Runnable} 
+ *  it is the main part behind the view commands
+ * @author Michael&Amit
+ * @see CLI
+ * @see Runnable
+ *
+ */
+
 public class MyCLI extends CLI implements Runnable  {
 	
 	HashMap<String, presenter.Presenter.Command> hm;

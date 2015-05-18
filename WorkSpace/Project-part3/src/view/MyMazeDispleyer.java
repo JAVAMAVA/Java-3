@@ -1,9 +1,18 @@
 package view;
 
+import presenter.Presenter.DisplayMazeCommand;
 import algorithms.mazeGenerators.Maze;
-
+/**
+ * {@link MyMazeDispleyer} implements {@link MazeDispleyer} 
+ * this class got the display method that prints out a maze
+ * @author user
+ *
+ */
 public class MyMazeDispleyer implements MazeDispleyer {
-
+	
+	/**
+	 * display method displays a maze in the console
+	 */
 	@Override
 	public void display(Maze matrix) {
 		for (int j = 0; j < matrix.getCols(); j++)

@@ -11,7 +11,8 @@ import view.View;
 /**
  * Presenter is the the class that runs every command and control the actions. It has a {@link View} and a {@link Model} that i controls on.
  * The class implements {@link Observer} and that means it gets notifications from the {@link View} and the {@link Model}
- * @author עמית
+ * @author Michael & Amit
+ *
  *
  */
 public class Presenter implements Observer {
@@ -47,22 +48,28 @@ public class Presenter implements Observer {
 		   
 		   //if the model notified the presenter
 		   if(o == m) {
-			   if((String)args=="maze")
-			   	{
-				 Maze matrix=m.getMaze();
-				 v.displayMaze(matrix);
-				 
-			   	}
-			   if((String)args=="solution")
-			   	{
-				   Solution sol=m.getSolution();
-				   v.displaySolution(sol);
-			   	}
-			   else v.displaySuccess((String)args);     
+			   switch((String)args)
+			   {
+			   case "Maze was found":
+				   v.displayMaze(m.getMaze());
+				   break;
+			   case "Maze was not found":
+				   v.displaySuccess((String)args);
+				   break;
+			   case "Solution was found":
+			   		v.displaySolution(m.getSolution((String)args));
+			   		break;
+			   case "Solution was not found":
+				   v.displaySuccess((String)args);
+				   break;
+			   case "Maze generated":
+				   v.displaySuccess((String)args);
+				   break;
+			   case "Maze already exists":
+				   v.displaySuccess((String)args);
+				   break;
+			   }
 		   }
-
-		   
-		  
 		}
 
 	public interface Command {
@@ -73,6 +80,7 @@ public class Presenter implements Observer {
 		@Override
 		public void doCommand(String arg) {
 			String[] commands=arg.split(" ");
+			//check input
 			m.generateMaze(commands[0],Integer.parseInt(commands[1]),Integer.parseInt(commands[2]));
 			v.displaySuccess("maze"+commands[0]+" is ready");
 		}

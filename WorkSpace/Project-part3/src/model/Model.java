@@ -1,16 +1,15 @@
 package model;
 
-import java.util.Observer;
-
 import algorithms.mazeGenerators.Maze;
 import algorithms.search.Solution;
 
 public interface Model {
-	void generateMaze(int rows,int cols); 
-	Maze getMaze(); 
-	void solveMaze(Maze m); 
-	Solution getSolution(); 
+	void generateMaze(String name,int rows,int cols); 
+	void solveMaze(String name); 
+	Solution getSolution(String name); 
 	void stop();
-	void addobserver(Observer observer);
+	Maze getMaze();
+	void getMazeInModel(String arg);
+	void getSolutionInModel(String arg);
 
 }
